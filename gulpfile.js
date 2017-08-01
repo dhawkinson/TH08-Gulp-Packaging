@@ -6,6 +6,7 @@
 const 
     gulp        = require('gulp'),
     rename      = require('gulp-rename'),
+    replace     = require('gulp-replace'),
     del         = require('del'),
     concat      = require('gulp-concat'),
     sass        = require('gulp-sass'),
@@ -26,10 +27,10 @@ const paths = {
 
 //  gulp 'clean' task: remove the following
 //      dist folder (the distribute package)
-//      src/js all.min.js & all.min.js.map
-//      src/styles all.min.css & all.min.css.map
 gulp.task('clean', () => {
-    return del.sync([`${paths.dist}`, `${paths.src}/js/all.min*`, `${paths.src}/styles/all.min*`]);
+    return del.sync([
+        `${paths.dist}`
+    ]);
 });
 
 //  gulp 'scripts' task: concatenates all js files to all.min.js, minifies and maps all.min.js,
@@ -42,23 +43,21 @@ gulp.task('scripts', () => {
         .pipe(uglify())
         .pipe(maps.write('./'))
         .pipe(gulp.dest(`${paths.dist}/js`))        //  send to the distribution package
-        .pipe(gulp.dest(`${paths.src}/js`))         //  send to the src for rendering
         .pipe(browserSync.stream({ match: '**/*.js' }));
 });
 
 //  gulp 'styles' task: compresses all global.scss file to all.min.css, minifies and maps all.min.css, 
 //      pipes it to the distribution folder then performs browser syncing
-gulp.task('styles', () => {                 //  called compileSass in gulp-basics
+//      then also pipes it to src for rendering in the "working" environment
+gulp.task('styles', () => {
     return gulp.src(`${paths.src}/sass/global.scss`)
         .pipe(plumber())
         .pipe(maps.init())
         .pipe(sass({ outputStyle: 'compressed' }).on('error', sass.logError))
-        //.pipe(sass({ outputStyle: 'compressed' }).on('error', errorHandler))
         .pipe(cleanCSS())
         .pipe(rename('all.min.css'))
         .pipe(maps.write('./'))
-        .pipe(gulp.dest(`${paths.dist}/styles`))    //  send to 
-        .pipe(gulp.dest(`${paths.src}/styles`))
+        .pipe(gulp.dest(`${paths.dist}/styles`))    //  send to the distribution package
         .pipe(browserSync.stream({ match: '**/*.css' }));
 });
 
@@ -69,7 +68,7 @@ gulp.task('images', () => {
             imagemin.jpegtran({ progressive: true }),
             imagemin.optipng({ optimizationLevel: 5 })
         ]))
-        .pipe(gulp.dest('./dist/images'));
+        .pipe(gulp.dest('./dist/content'));
 });
 
 //  gulp 'icons' task: minifies icons (svgs) then pipes them to the distribution folder
@@ -83,7 +82,7 @@ gulp.task('icons', () => {
 
 //  gulp 'build' task: executed as stand-alone or as first step in 'default'
 //      it basically preps the distribution environment
-//      by executing; clean, styles, scripts, images, icons
+//      by executing; clean [must complete first], scripts, styles, images, icons
 gulp.task('build', ['clean', 'scripts', 'styles', 'images', 'icons'], () => {
     gutil.log('Build Finished');
 });
@@ -95,12 +94,13 @@ gulp.task('watch', () => {
     gulp.watch(`${paths.src}/js/**/*`, ['scripts']);
 });
 
-//  gulp 'index' task: executed as stand-alone or as second step in 'default'
-//      pipes the index.html file "as is" to the dist folder
+//  gulp 'replace-html' task: executed as stand-alone or as second step in 'default'
+//      pipes the *.html files "as is" to the dist folder
 //      new task
-gulp.task('index', () => {
-    return gulp.src(`${paths.root}index.html`)
-        .pipe(gulp.dest(`${paths.dist}`));
+gulp.task('replace-html', function () {
+    return gulp.src(`${paths.root}*.html`)
+        .pipe(replace('images/','content/'))
+        .pipe(gulp.dest('dist'));
 });
 
 //  gulp 'sync' task: executed as stand-alone or as last step in 'default'
@@ -109,14 +109,14 @@ gulp.task('index', () => {
 gulp.task('sync', ['build'], () => {
     return browserSync.init({
         server: {
-            //baseDir: './dist'
-            baseDir: './'
+            baseDir: './dist'
         }
     });
 });
 
 //  gulp 'default' task:  executed by 'gulp' command
-//      calls in turn: build, watch, sync
-gulp.task('default', ['build', 'watch', 'index', 'sync'], () => {
+//      calls in turn: build, watch, replace-html, sync
+gulp.task('default', ['build', 'watch', 'replace-html', 'sync'], () => {
     gutil.log('Wow, I can\'t believe I Gulped everything down!');       //  log the default task completion
 });
+
