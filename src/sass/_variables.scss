@@ -33,11 +33,12 @@ $link: $primary;
 $link-hover: darken($link, 10%);
 $link-secondary: lighten($link, 20%);
 
-$color-inactive: #999999;
+$color-inactive: #000000;
 $secondary-label: lighten($secondary, 20%);
 
 $positive: #54b26c;
 $negative: #ed5a5a;
+
 
 $button-color: $link;
 

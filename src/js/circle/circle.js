@@ -4,15 +4,15 @@ $( document ).ready(function() {
     
     //Cloner for infinite input lists
     $(".circle--clone--list").on("click", ".circle--clone--add", function(){
-        let parent = $(this).parent("li");
-        let copy = parent.clone();
+        var parent = $(this).parent("li");
+        var copy = parent.clone();
         parent.after(copy);
         copy.find("input, textarea, select").val("");
         copy.find("*:first-child").focus();
     });
     
     $(".circle--clone--list").on("click", "li:not(:only-child) .circle--clone--remove", function(){
-        let parent = $(this).parent("li");
+        var parent = $(this).parent("li");
         parent.remove();
     });
     
@@ -31,8 +31,8 @@ $( document ).ready(function() {
     
     // Clickable table row
     $(".clickable-row").click(function() {
-        let link = $(this).data("href");
-        let target = $(this).data("target");
+        var link = $(this).data("href");
+        var target = $(this).data("target");
         
         if ($(this).attr("data-target")) {
             window.open(link, target);
@@ -43,9 +43,9 @@ $( document ).ready(function() {
     });
     
     // Custom File Inputs
-    let input = $(".circle--input--file");
-    let text = input.data("text");
-    let state = input.data("state");
+    var input = $(".circle--input--file");
+    var text = input.data("text");
+    var state = input.data("state");
     input.wrap(function() {
         return "<a class='button " + state + "'>" + text + "</div>";
     });
