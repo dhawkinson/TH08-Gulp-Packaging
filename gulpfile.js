@@ -98,6 +98,7 @@ gulp.task('watch', () => {
 
 //  gulp 'index' task: executed as stand-alone or as second step in 'default'
 //      pipes the index.html file "as is" to the dist folder
+//      new task
 gulp.task('index', () => {
     return gulp.src(`${options.root}index.html`)
         .pipe(gulp.dest(`${options.dist}`));
